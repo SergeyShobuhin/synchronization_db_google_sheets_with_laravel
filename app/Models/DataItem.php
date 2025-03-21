@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DataItemStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,8 +19,8 @@ class DataItem extends Model
 //    ];
     protected $guarded = [];
 
-//    public function getRouteKeyName()
-//    {
-//        return 'name'; // Указываем, что нужно использовать поле 'id'
-//    }
+    public function scopeAllowed($query)
+    {
+        return $query->where('status', DataItemStatus::Allowed);
+    }
 }

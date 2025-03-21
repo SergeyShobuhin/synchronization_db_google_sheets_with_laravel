@@ -25,16 +25,8 @@
             @endforeach
             </tbody>
         </table>
-{{--        <div class="mb-3">{{ $blogs->withQueryString()->onEachSide(5)->links() }}</div>--}}
         <div class="mb-3">{{ $dataItems->withQueryString()->onEachSide(3)->links() }}</div>
     </div>
     <a class="btn btn-primary mb-3" href="{{ route('dataitem.create') }}">Создать запись</a>
-
 @endsection
 
-<form action="{{ route('dataitem.generate') }}" method="POST">
-    @csrf
-    <button type="submit" class="btn btn-primary mb-3">Создать 1000 записей</button>
-</form>
-
-<a class="btn btn-danger mb-3" href="{{ route('clear-dataitem') }}" onclick="return confirm('Вы уверены, что хотите очистить таблицу?')">Очистить таблицу</a>

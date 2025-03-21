@@ -24,9 +24,9 @@ class DataItemController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'=> 'string',
-            'description' =>'string',
-            'status'=> '',
+            'name' => 'string',
+            'description' => 'string',
+            'status' => '',
         ]);
         DataItem::create($data);
 
@@ -47,9 +47,9 @@ class DataItemController extends Controller
     public function update(Request $request, DataItem $dataitem)
     {
         $data = $request->validate([
-            'name'=> 'string',
-            'description' =>'string',
-            'status'=> '',
+            'name' => 'string',
+            'description' => 'string',
+            'status' => '',
         ]);
         $dataitem->update($data);
 

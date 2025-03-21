@@ -9,7 +9,7 @@ class GenerateController extends Controller
 {
     public function generate()
     {
-        DataItem::factory(1000)->create();
+        DataItem::factory(100)->create();
         return redirect()->route('dataitem.index');
     }
 
