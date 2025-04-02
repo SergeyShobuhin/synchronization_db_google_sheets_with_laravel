@@ -9,17 +9,21 @@ use App\Services\GoogleSheets\GoogleSheetsManager;
 
 class DataExportController extends Controller
 {
-    public function exportSheet(GoogleSheetsManager $manager)
+    public function exportSheet(GoogleSheetsManager $manager,)
     {
         try {
             $googleSheetsService = $manager->getService();
 
             $dataItems = DataItem::allowed()->get();
             $itemsStatus = $dataItems->pluck('id')->toArray();
-
-            $googleSheetsService->compareDataToSheet($itemsStatus);
             $data = (new Service())->getDataToStatusAllowed($dataItems);
-            $googleSheetsService->updateData($data);
+
+            if ($googleSheetsService->getData() == null) {
+                $googleSheetsService->appendData($data);
+            } else {
+                $googleSheetsService->compareDataToSheet($itemsStatus);
+                $googleSheetsService->updateData($data);
+            }
 
             return back()->with('success', 'Данные успешно экспортированы в Google Sheet!');
 

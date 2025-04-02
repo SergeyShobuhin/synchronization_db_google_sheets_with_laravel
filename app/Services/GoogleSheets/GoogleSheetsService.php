@@ -225,7 +225,6 @@ class GoogleSheetsService
         }
 
         $parsed = GoogleSheetsUrlParser::parse($url);
-//        dd($parsed);
         return new self($parsed['spreadsheetId'], $parsed['gid']);
     }
 }

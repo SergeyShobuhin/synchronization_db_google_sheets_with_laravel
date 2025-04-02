@@ -23,6 +23,7 @@ class GoogleSheetsManager
             $url = session('google_sheet.url');
             if (empty($url)) {
                 throw new \RuntimeException('GoogleSheetsService не подключен. Сначала установите соединение.');
+//                return back()->with('success', 'GoogleSheetsService не подключен. Сначала установите соединение.');
             }
 
             $this->service = GoogleSheetsService::createFromUrl($url);
