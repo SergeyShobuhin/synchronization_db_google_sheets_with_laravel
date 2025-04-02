@@ -4,11 +4,14 @@ namespace App\Services\GoogleSheets;
 
 use Google\Client;
 use Google\Service\Sheets;
+use Google\Service\Sheets\AppendDimensionRequest;
 use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 use Google\Service\Sheets\BatchUpdateValuesRequest;
+use Google\Service\Sheets\CellData;
 use Google\Service\Sheets\ClearValuesRequest;
 use Google\Service\Sheets\DeleteDimensionRequest;
 use Google\Service\Sheets\Request;
+use Google\Service\Sheets\RowData;
 use Google\Service\Sheets\ValueRange;
 
 class GoogleSheetsService
@@ -142,6 +145,74 @@ class GoogleSheetsService
         }
     }
 
+    public function appendRow($idsToAppend): void
+    {
+        $sheetData = $this->getData();
+
+        sort($idsToAppend);
+
+        $lastIndex = -1; // Индекс последней обработанной строки
+        foreach ($sheetData as $index => $row) {
+            if (isset($row[0])) {
+                $lastIndex = (int) $row[0];
+            }
+        }
+
+        foreach ($idsToAppend as $idToAppend) {
+            $inserted = false;
+            for ($i = 0; $i < count($sheetData); $i++) {
+
+                $currentRowId = (int) $sheetData[$i][0];
+
+                if ($currentRowId > $idToAppend) {
+                    // Создаем пустую строку с нужным количеством столбцов
+                    $emptyRow = array_fill(0, count($sheetData[$i]), '');
+
+                    // Вставляем пустую строку
+                    array_splice($sheetData, $i, 0, [$emptyRow]);
+
+                    $inserted = true;
+                    break;
+                }
+            }
+
+            // Если вставить не удалось, добавляем в конец
+            if (!$inserted) {
+                //Создаем пустую строку
+                $emptyRow = [];
+                if (!empty($sheetData)) {
+                    $emptyRow = array_fill(0, count($sheetData[0]), '');// Заполняем в соответствии с длинной первой строки
+                }
+
+                $sheetData[] = $emptyRow;
+                $inserted = true;
+
+            }
+        }
+
+        // Обновляем Google Sheet
+        $range = $this->sheetName;
+        $body = new ValueRange([
+            'values' => $sheetData,
+        ]);
+        $params = [
+            'valueInputOption' => 'USER_ENTERED', // Или 'RAW'
+        ];
+
+        try {
+            $result = $this->service->spreadsheets_values->update(
+                $this->spreadsheetId,
+                $range,
+                $body,
+                $params
+            );
+            printf("%d cells updated.\n", $result->getUpdatedCells());
+        } catch (\Exception $e) {
+            \Log::error('Google Sheets API Error (appendRow): ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function deleteRow($idsToDelete): void
     {
         $sheetData = $this->getData();
@@ -189,7 +260,14 @@ class GoogleSheetsService
             }
         }
 
+        $idsToAppend = array_diff($itemsStatus,$arrSheetData);
+
         $idsToDelete = array_diff($arrSheetData, $itemsStatus);
+
+
+        if (!empty($idsToAppend)) {
+            $this->appendRow($idsToAppend);
+        }
 
         if (!empty($idsToDelete)) {
             $this->deleteRow($idsToDelete);
